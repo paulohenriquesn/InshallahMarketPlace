@@ -79,7 +79,9 @@ routes.get(pathHistory + '/id/:pessoa', async(req,res) => {
                 Pago
             ], (error) => {
                 if (error) {
+                    console.log(error)
                     res.status(400).send({ error })
+                    console.log(error)
                 } else {
                     res.send()
                 }

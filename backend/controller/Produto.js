@@ -58,15 +58,16 @@ routes.get(path + '/:codigo', async (req, res) => {
 routes.post(path, Auth ,async (req, res) => {
 
     if (await ProdutoValidator.isValid(req.body)) {
-        const { codigo, tipo, nome, preco, tamanho, imagem } = req.body;
+        const { codigo, tipo, nome, preco, tamanho, imagem,quantidade } = req.body;
 
-        db.query("INSERT INTO produtos(codigo,tipo,nome,preco,tamanho,imagem) VALUES (?,?,?,?,?,?)", [
+        db.query("INSERT INTO produtos(codigo,tipo,nome,preco,tamanho,imagem,quantidade) VALUES (?,?,?,?,?,?,?)", [
             codigo,
             tipo,
             nome,
             preco,
             tamanho,
-            imagem
+            imagem,
+            quantidade
         ], (error) => {
             if (error) {
                 return res.status(400).send({

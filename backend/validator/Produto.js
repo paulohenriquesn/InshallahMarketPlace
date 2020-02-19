@@ -6,5 +6,6 @@ export default yup.object().shape({
     nome: yup.string().required(),
     preco: yup.number().round().required(),
     tamanho: yup.number().round(),
-    imagem: yup.string()
+    imagem: yup.string(),
+    quantidade: yup.number().required()
 })
