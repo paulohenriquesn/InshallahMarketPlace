@@ -43,10 +43,42 @@
 }
 
 .produtoCard {
+    margin-top:10px;
     display: flex;
     flex-direction: column;
     width:240px;
     align-items: center;
     justify-content: center;
+    margin-left:30px;
 }
 
+.produtoCard img {
+    margin-left:5px;
+    margin-bottom:20px;
+}
+
+.ProdutosLista {
+    display: flex;
+    flex-direction: row;
+}
+
+.inputFormCriarPedido {
+    margin-top:10px;
+}
+
+.produtoCadastroInput {
+    width: 300px;
+}
+
+.infoProduto {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.imagemProduto_ {
+    width:160px;
+    height:160px;
+    margin-left: 30%;
+}
