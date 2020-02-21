@@ -1,6 +1,10 @@
 create database ish_system;
 use ish_system;
 
+create table infos (faturamento double,pecasVendidas int);
+
+INSERT INTO infos(faturamento,pecasVendidas) VALUES (0,0);
+
 create table usuarios(
     id int primary key auto_increment,
     username varchar(124) unique,
@@ -14,7 +18,8 @@ create table produtos (
     nome varchar(364),
     preco double,
     tamanho double,
-    imagem varchar(724)
+    imagem varchar(724),
+    quantidade int
 );
 
 create table pedidos (
