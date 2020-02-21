@@ -16,6 +16,10 @@ const Home = ({ history }) => {
     const [btnMenu, setButtonMenu] = useState('lista-pedidos');
     const [SearchText, setSearchText] = useState('')
 
+    const [faturamento, setFaturamento] = useState({});
+
+    const [SearchProdutoText, setSearchProdutoText] = useState('')
+
     const [ProdutoModal, setProdutoModal] = useState({})
     const [ModalProdutoShow, setShowModalProduto] = useState(false)
 
@@ -23,9 +27,6 @@ const Home = ({ history }) => {
     const [showModal, setShowModal] = useState(false)
 
     const [PedidoProduto, setPedidoProduto] = useState({})
-
-    const [faturamento, setFaturamento] = useState(0.0);
-
     const [HistoricoLista, setHistoricoLista] = useState([])
     const [PedidosLista, setPedidosLista] = useState([])
     const [ProdutosLista, setProdutosLista] = useState([])
@@ -33,80 +34,65 @@ const Home = ({ history }) => {
     const [ModalCriarPedidoShow, setModalCriarPedido] = useState(false);
     const [idSel, idSelecionado] = useState(0)
 
-    var ProdutoNovo = {
-        Codigo: 0,
-        Tipo: "",
-        NomeDoProduto: "",
-        Preco: 0.0,
-        Quantidade: 0
-    }
+    const [codigoProdutoNovo, setCodigoProdutoNovo] = useState(0);
+    const [tipoProdutoNovo, setTipoProdutoNovo] = useState("");
+    const [NomeDoProdutoProdutoNovo, setNomeDoProdutoProdutoNovo] = useState("");
+    const [PrecoProdutoNovo, setPrecoProdutoNovo] = useState(0.0);
+    const [QuantidadeProdutoNovo, setQuantidadeProdutoNovo] = useState(0);
 
-    var PedidoNovo = {
-        nomeCliente: "",
-        CPF: "",
-        Telefone: "",
-        "Endereco": "",
-        "FormaDePagamento": "",
-        "JaPagou": ""
-    }
+    const [nomePedidoNovo, setNomePedidoNovo] = useState("");
+    const [CPFPedidoNovo, setCPFPedidoNovo] = useState("");
+    const [TelefonePedidoNovo, setTelefonePedidoNovo] = useState("");
+    const [EnderecoPedidoNovo, setEnderecoPedidoNovo] = useState("");
+    const [FormaDePagamentoPedidoNovo, setFormaDePagamentoPedidoNovo] = useState("");
+    const [JaPagouPedidoNovo, setJaPagouPedidoNovo] = useState("Não");
+
+    const [Quantidade, setQuantidade] = useState(0)
+    const [EscolhaAlterar,setEscolhaAlterar] = useState("");
+
+    const [RemoverQuantidadeModalShow, setRemoverQuantidadeModalShow] = useState(false)
 
     const CadastrarProduto = async (data) => {
         await api.post('/produtos', {
-            "codigo": data.Codigo,
-            "tipo": data.Tipo,
-            "nome": data.NomeDoProduto,
-            "preco": data.Preco,
-            "quantidade": data.Quantidade
+            "codigo": codigoProdutoNovo,
+            "tipo": tipoProdutoNovo,
+            "nome": NomeDoProdutoProdutoNovo,
+            "preco": PrecoProdutoNovo,
+            "quantidade": QuantidadeProdutoNovo
         });
         notification.success({ message: "Produto Criado com Sucesso!" });
-
-        var ProdutoNovo = {
-            Codigo: 0,
-            Tipo: "",
-            NomeDoProduto: "",
-            Preco: 0.0,
-            Quantidade: 0
-        }
         FetchProdutos()
     }
 
-    const createPedido = async (data) => {
-        console.log(data)
-        const data_ = {
-            nome_cliente: data.nomeCliente,
-            pedido: PedidoProduto.nome,
-            CPF: data.CPF,
-            telefone: data.Telefone,
-            endereco: data.Endereco,
-            valortotal: PedidoProduto.preco,
-            formadePagamento: data.FormaDePagamento,
-            Pago: data.JaPagou
-        };
-        console.log(data_)
+    const createPedido = async () => {
+
         await api.post('/process/order', {
-            nome_cliente: data.nomeCliente,
+            nome_cliente: nomePedidoNovo,
             pedido: PedidoProduto.nome,
-            CPF: PedidoNovo.CPF,
-            telefone: data.Telefone,
-            endereco: data.Endereco,
+            CPF: CPFPedidoNovo,
+            telefone: TelefonePedidoNovo,
+            endereco: EnderecoPedidoNovo,
             valortotal: PedidoProduto.preco,
-            formadePagamento: data.FormaDePagamento,
-            Pago: data.JaPagou
+            formadePagamento: FormaDePagamentoPedidoNovo,
+            Pago: JaPagouPedidoNovo
         })
         FetchPedidos()
-        PedidoNovo = {
-            nomeCliente: "",
-            CPF: "",
-            Telefone: "",
-            "Endereco": "",
-            "FormaDePagamento": "",
-            "JaPagou": ""
-        }
 
         notification.success({
             message: "Pedido Criado com Sucesso!"
         })
 
+    }
+
+    const fetchFaturamento = async () => {
+        const response = await api.get('/produtos/faturamento')
+        setFaturamento(response.data)
+        console.log(response.data)
+    }
+
+    const ZerarFaturamento = async () => {
+        await api.post('/produtos/zerarfaturamento')
+        fetchFaturamento()
     }
 
     const FetchProdutos = async () => {
@@ -126,18 +112,37 @@ const Home = ({ history }) => {
         setPedidosLista(response.data)
     }
 
+
+    const SearchProduto = async () => {
+        const response = await api.get('/produtos/' + SearchProdutoText)
+        console.log(response.data)
+        setProdutosLista(response.data)
+    }
+
     const SearchPedido = async () => {
         const response = await api.get('/process/order/' + SearchText)
         console.log(response.data)
         setPedidosLista(response.data)
     }
 
-    const DefinirPago = async (id) => {
+    const AtualizarFaturamento = async (data) => {
+
+        await api.post('/produtos/faturar')
+        await api.post('/produtos/faturamento', {
+            valor: data.ValorTotal
+        })
+        fetchFaturamento()
+    }
+
+    const DefinirPago = async (id, pedido) => {
         await api.post(`/process/order/pay/${id}`);
         await api.delete("/process/order/" + id)
+        await api.post('/produtos/remover/' + pedido);
+
 
         FetchPedidos()
         FetchHistorico()
+        FetchProdutos()
         notification.success({
             message: "Pedido #" + id + " Pago"
         })
@@ -153,6 +158,30 @@ const Home = ({ history }) => {
             message: "Produto #" + codigo + " Deletado"
         })
     }
+
+    const AdicionarQuantidade = async () => {
+        await api.post(`/produtos/adicionar/${ProdutoModal.nome}/${Quantidade}`);
+        notification.success({ message: "Quantidade Adicionada!" })
+        setShowModalProduto(false)
+        FetchProdutos()
+    }
+
+    const RemoverQuantidade = async () => {
+        await api.post(`/produtos/remover/${ProdutoModal.nome}/${Quantidade}`);
+        notification.success({ message: "Quantidade Removida!" })
+        setShowModalProduto(false)
+        FetchProdutos()
+    }
+
+    const AlterarPreco = async () => {
+        await api.post(`/produtos/preco/${ProdutoModal.nome}`,{
+            valor: Quantidade
+        });
+        notification.success({ message: "Preço Alterado!" })
+        setShowModalProduto(false)
+        FetchProdutos()
+    }
+
 
     const DeletePedidoHistorico = async (id) => {
 
@@ -200,13 +229,15 @@ const Home = ({ history }) => {
         FetchPedidos();
         FetchHistorico();
         FetchProdutos();
+        fetchFaturamento();
     }, [Init])
 
     return (
         <Content className="index">
             <Menu
+                theme="dark"
                 onClick={() => { }}
-                style={{ width: 256 }}
+                style={{ width: 256, marginTop: '5%', marginLeft: '30px' }}
                 defaultSelectedKeys={['1']}
                 defaultOpenKeys={['sub1']}
                 mode="inline"
@@ -242,7 +273,34 @@ const Home = ({ history }) => {
             </Menu>
 
             <Content className="content">
-
+                <Modal
+                    visible={RemoverQuantidadeModalShow}
+                    title={"Editando Produto " + ProdutoModal.nome}
+                    okText="Alterar"
+                    cancelText="Cancelar"
+                    onCancel={() => {
+                        setRemoverQuantidadeModalShow(false)
+                    }}
+                    onOk={() => {
+                        setRemoverQuantidadeModalShow(false)
+                        switch(EscolhaAlterar){
+                            case "RemoverQuantidade":
+                                RemoverQuantidade()
+                            break;
+                            case "AdicionarQuantidade":
+                                AdicionarQuantidade()
+                            break;
+                            case "AlterarPreço":
+                                AlterarPreco()
+                            break;
+                        }
+                        
+                    }}
+                >
+                    <InputNumber placeholder="Valor" style={{ width: '100%' }} onChange={(e) => {
+                        setQuantidade(e)
+                    }} />
+                </Modal>
 
                 <Modal
                     visible={ModalCriarPedidoShow}
@@ -254,32 +312,29 @@ const Home = ({ history }) => {
                     }}
                     onOk={() => {
                         setModalCriarPedido(false)
-                        createPedido(PedidoNovo);
+                        createPedido();
                         FetchPedidos()
                     }}
                 >
                     <>
                         <Input placeholder="Nome do Cliente" className="inputFormCriarPedido" onChange={(e) => {
-                            PedidoNovo.nomeCliente = e.target.value;
+                            setNomePedidoNovo(e.target.value);
                         }} />
                         <Input placeholder="CPF do Cliente" className="inputFormCriarPedido" onChange={(e) => {
                             try {
-                                PedidoNovo.CPF = e.target.value;
+                                setCPFPedidoNovo(e.target.value);
                             } catch{ }
                         }} />
                         <Input placeholder="Telefone do Cliente" className="inputFormCriarPedido" onChange={(e) => {
                             try {
-                                PedidoNovo.Telefone = e.target.value;
+                                setTelefonePedidoNovo(e.target.value);
                             } catch{ }
                         }} />
                         <Input placeholder="Endereço do Cliente" className="inputFormCriarPedido" onChange={(e) => {
-                            PedidoNovo.Endereco = e.target.value;
+                            setEnderecoPedidoNovo(e.target.value);
                         }} />
                         <Input placeholder="Forma de Pagamento (Cartão, Boleto, Dinheiro)" className="inputFormCriarPedido" onChange={(e) => {
-                            PedidoNovo.FormaDePagamento = e.target.value;
-                        }} />
-                        <Input placeholder="Já Pagou? (Sim ou Não)" className="inputFormCriarPedido" onChange={(e) => {
-                            PedidoNovo.JaPagou = e.target.value;
+                            setFormaDePagamentoPedidoNovo(e.target.value);
                         }} />
                     </>
                 </Modal>
@@ -294,14 +349,6 @@ const Home = ({ history }) => {
                     }}
                     onOk={() => {
                         setShowModalProduto(false)
-                        PedidoNovo = {
-                            nomeCliente: "",
-                            CPF: "",
-                            Telefone: "",
-                            "Endereco": "",
-                            "FormaDePagamento": "",
-                            "JaPagou": ""
-                        }
                         setModalCriarPedido(true)
                         setPedidoProduto(ProdutoModal)
                     }}
@@ -309,9 +356,21 @@ const Home = ({ history }) => {
                     <div className="infoProduto">
                         <nav className="_">
                             <h3>Tipo: {ProdutoModal.tipo}</h3>
-                            <h3>Tamanho: {ProdutoModal.tamanho}</h3>
+
                             <h4>Quantidade: {ProdutoModal.quantidade}</h4>
                             <h1>R$ {ProdutoModal.preco}</h1>
+                            <Button onClick={() => {
+                                setEscolhaAlterar("RemoverQuantidade")
+                                setRemoverQuantidadeModalShow(true)
+                            }}>Remover Quantidade</Button>
+                            <Button onClick={() => {
+                                setEscolhaAlterar("AdicionarQuantidade")
+                                setRemoverQuantidadeModalShow(true)
+                            }}>Adicionar Quantidade</Button>
+                            <Button onClick={() => {
+                                setEscolhaAlterar("AlterarPreço")
+                                setRemoverQuantidadeModalShow(true)
+                            }}>Alterar Preço</Button>
                         </nav>
                         <img src={`http://localhost:8000/produtos/img/${ProdutoModal.codigo}`} className="imagemProduto_"></img>
                     </div>
@@ -346,18 +405,18 @@ const Home = ({ history }) => {
                         <Typography style={{ marginTop: 20 }}>Codigo</Typography>
                         <InputNumber className="produtoCadastroInput" onChange={(e) => {
                             try {
-                                ProdutoNovo.Codigo = e
+                                setCodigoProdutoNovo(e)
                             } catch{ }
                         }}></InputNumber>
                         <Divider />
                         <Typography>Tipo</Typography>
                         <Input placeholder="Tipo" className="produtoCadastroInput" onChange={(e) => {
-                            ProdutoNovo.Tipo = e.target.value;
+                            setTipoProdutoNovo(e.target.value);
                         }} />
                         <Divider />
                         <Typography>Nome do Produto</Typography>
                         <Input placeholder="Nome" className="produtoCadastroInput" onChange={(e) => {
-                            ProdutoNovo.NomeDoProduto = e.target.value;
+                            setNomeDoProdutoProdutoNovo(e.target.value);
                         }} />
                         <Divider />
                         <Typography>Preço</Typography>
@@ -371,7 +430,7 @@ const Home = ({ history }) => {
                             onChange={(e) => {
                                 try {
 
-                                    ProdutoNovo.Preco = parseFloat(e);
+                                    setPrecoProdutoNovo(parseFloat(e));
                                 } catch{ }
                             }}
                         />
@@ -380,11 +439,11 @@ const Home = ({ history }) => {
                         <Typography>Quantidade</Typography>
                         <InputNumber placeholder="Quantidade" className="produtoCadastroInput" onChange={(e) => {
                             try {
-                                ProdutoNovo.Quantidade = e;
+                                setQuantidadeProdutoNovo(e);
                             } catch{ }
                         }} />
                         <Button style={{ marginTop: 20 }} onClick={() => {
-                            CadastrarProduto(ProdutoNovo)
+                            CadastrarProduto()
                             setButtonMenu("lista-produtos")
                         }}>Cadastrar</Button>
                     </div>
@@ -396,10 +455,12 @@ const Home = ({ history }) => {
                         <Typography style={{ marginBottom: '20px', fontSize: 17 }}>Historico de Pedidos de Clientes</Typography>
                         <div className="status">
 
-                            <Statistic title="Faturamento" className="statusUN" value={0} />
-                            <Statistic title="Peças Vendidas" className="statusUN" value={0} />
-
+                            <Statistic title="Faturamento" className="statusUN" value={faturamento.faturamento} />
+                            <Statistic title="Peças Vendidas" className="statusUN" value={faturamento.pecasVendidas} />
                         </div>
+                        <Button onClick={() => {
+                            ZerarFaturamento()
+                        }} >Zerar</Button>
                         <Divider />
                         <Timeline>
 
@@ -441,6 +502,7 @@ const Home = ({ history }) => {
                     </>
                 )}
 
+
                 {btnMenu == "lista-pedidos" &&
                     PedidosLista.map((pedido) => {
                         console.log(pedido)
@@ -456,7 +518,8 @@ const Home = ({ history }) => {
                                 <p>Pago: {pedido.Pago}</p>
                                 <Divider />
                                 <Button style={{ color: 'green' }} onClick={() => {
-                                    DefinirPago(pedido.id)
+                                    DefinirPago(pedido.id, pedido.Pedido)
+                                    AtualizarFaturamento(pedido)
                                 }}>Definir como Pago</Button>
                                 <Button style={{ color: 'red' }} onClick={() => DeletePedido(pedido.id)}>Deletar</Button>
                             </Card>
@@ -464,43 +527,87 @@ const Home = ({ history }) => {
                     })
                 }
 
+
+                {btnMenu == "lista-produtos" && ProdutosLista.length > 0 && (
+                    <>
+                        <Input placeholder="Pesquisar (Codigo)" onChange={(e) => {
+                            setSearchProdutoText(e.target.value)
+                        }} style={{
+                            marginTop: 15,
+                            width: '300px'
+                        }} />
+                        <Button title="Pesquisar" style={{
+                            marginTop: 6
+                        }} onClick={() => {
+                            SearchProduto()
+                        }}>Pesquisar</Button>
+                    </>
+                )}
+
                 {btnMenu == "lista-produtos" && (
-                    <div className="ProdutosLista">
-                        {ProdutosLista.map((produto) => {
-                            return (
-                                <Card className="produtoCard">
-                                    <h1>{produto.nome}</h1>
-                                    <img src={`http://localhost:8000/produtos/img/${produto.codigo}`} className="imagemProduto"></img>
-                                    <Button onClick={() => {
-                                        DeleteProduto(produto.codigo)
-                                    }} style={{ color: 'red' }}>Deletar</Button>
-                                    <Button onClick={() => {
-                                        setProdutoModal(produto)
-                                        setShowModalProduto(true)
-                                    }}>Informações</Button>
-                                    <Button onClick={() => {
-                                        PedidoNovo = {
-                                            nomeCliente: "",
-                                            CPF: "",
-                                            Telefone: "",
-                                            "Endereco": "",
-                                            "FormaDePagamento": "",
-                                            "JaPagou": ""
-                                        }
-                                        setModalCriarPedido(true)
-                                        setPedidoProduto(produto)
-                                    }}>Novo Pedido</Button>
-                                    <Upload  {...props}>
-                                        <Button onClick={() => {
-                                            idSelecionado(produto.codigo)
-                                        }}>
-                                            <Icon type="upload" /> Definir Imagem Produto
+                    <>
+
+
+                        <div className="ProdutosLista">
+
+                            {ProdutosLista.map((produto) => {
+                                console.log(produto.quantidade)
+                                if (produto.quantidade > 0) {
+                                    return (
+                                        <Card className="produtoCard">
+                                            <h1>{produto.nome} <font color="green">R$ {produto.preco}</font> <p style={{fontSize:12}}>{produto.quantidade}qtd</p></h1>
+                                            <img src={`http://localhost:8000/produtos/img/${produto.codigo}`} className="imagemProduto"></img>
+                                            <Button onClick={() => {
+                                                DeleteProduto(produto.codigo)
+                                            }} style={{ color: 'red' }}>Deletar</Button>
+                                            <Button onClick={() => {
+                                                setProdutoModal(produto)
+                                                setShowModalProduto(true)
+                                            }}>Informações</Button>
+                                            <Button onClick={() => {
+                                                setModalCriarPedido(true)
+                                                setPedidoProduto(produto)
+                                            }}>Novo Pedido</Button>
+                                            <Upload  {...props}>
+                                                <Button onClick={() => {
+                                                    idSelecionado(produto.codigo)
+                                                }}>
+                                                    <Icon type="upload" /> Definir Imagem Produto
                     </Button>
-                                    </Upload>
-                                </Card>
-                            )
-                        })}
-                    </div>
+                                            </Upload>
+                                        </Card>
+                                    )
+                                } else {
+                                    return (
+                                        <Card className="produtoCard">
+                                            <h1>{produto.nome}</h1>
+                                            <h4 style={{ color: 'red' }}>Esgotado!</h4>
+                                            <img src={`http://localhost:8000/produtos/img/${produto.codigo}`} className="imagemProduto"></img>
+                                            <Button onClick={() => {
+                                                DeleteProduto(produto.codigo)
+                                            }} style={{ color: 'red' }}>Deletar</Button>
+                                            <Button onClick={() => {
+                                                setProdutoModal(produto)
+                                                setShowModalProduto(true)
+                                            }}>Informações</Button>
+                                            <Button onClick={() => {
+
+                                                setModalCriarPedido(true)
+                                                setPedidoProduto(produto)
+                                            }}>Novo Pedido</Button>
+                                            <Upload  {...props}>
+                                                <Button onClick={() => {
+                                                    idSelecionado(produto.codigo)
+                                                }}>
+                                                    <Icon type="upload" /> Definir Imagem Produto
+                    </Button>
+                                            </Upload>
+                                        </Card>
+                                    )
+                                }
+                            })}
+                        </div>
+                    </>
                 )}
 
 
