@@ -12,6 +12,7 @@ const Routes = () => {
     <BrowserRouter>
       <Switch>
         <Route exact path="/" component={Home} />
+        <Route exact path="/msg/:msg" component={Home} />
       </Switch>
     </BrowserRouter>
   )

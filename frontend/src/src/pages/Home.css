@@ -4,8 +4,26 @@
 .index {
     width:100%;
     display: flex;
+    align-items: center;
     flex:0;
     flex-direction: row;
+    justify-content: center;
+}
+
+.footer {
+    height:4%;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: gray;
+    color: white;
+    text-align: center;
+ }
+
+.menuflutuante {
+    margin-top:40px;
+    max-width: 250px;
 }
 
 .content
