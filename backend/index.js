@@ -1,5 +1,5 @@
-import app from './app'
+import app_ from './app'
 
-app.server.listen(8000,() => {
+app_.server.listen(8000,() => {
     console.log("Server Inicializado com Sucesso!")
 })
